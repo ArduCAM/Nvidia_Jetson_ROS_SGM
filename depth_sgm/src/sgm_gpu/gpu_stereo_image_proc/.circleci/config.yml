@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: whill/ros_build_with_visionworks
+
+    shell: /bin/bash
+    working_directory: ~/catkin_ws/src/ros_target_pkg
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - checkout
+
+      - run:
+          name: Resolve dependencies
+          command: |
+           cd ~/catkin_ws/src
+           apt-get update -qq
+           apt-get install -y python-catkin-tools
+           rosdep install -y --from-path .. --ignore-src --rosdistro=melodic
+           
+      - run:
+          name: catkin_make
+          command: |
+           source /opt/ros/melodic/setup.bash
+           cd ~/catkin_ws
+           catkin build  -DAUTO_DETECT_ARCH=OFF -DCUDA_ARCH="-arch=sm_72"
